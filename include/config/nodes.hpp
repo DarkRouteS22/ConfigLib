@@ -18,6 +18,7 @@ class Node {
 public:
     virtual ~Node() = default;
     virtual std::string serialize() = 0;
+    virtual NodeType type() const = 0;
 };
 
 class ValueNode : public Node {
@@ -25,6 +26,7 @@ private:
     std::string value;  
 public:
     std::string getValue(); 
+    NodeType type() const override { return NodeType::ValueNode; };
 };
 
 class ObjectNode : public Node {
@@ -32,6 +34,7 @@ private:
     std::unordered_map<std::string, std::shared_ptr<Node>> fields;
 public:
     std::unordered_map<std::string, std::shared_ptr<Node>> getValue(); 
+    NodeType type() const override { return NodeType::ObjectNode; };
 };
 
 class ArrayNode : public Node {
@@ -39,6 +42,7 @@ private:
     std::vector<std::shared_ptr<Node>> elements;
 public:
     std::vector<std::shared_ptr<Node>> getValue(); 
+    NodeType type() const override { return NodeType::ArrayNode; };
 };
 
 }
