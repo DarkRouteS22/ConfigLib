@@ -11,7 +11,7 @@ public:
         JSON,
     };
     Parser(Type type);
-    std::unique_ptr<Node> parse(const std::string& string);
+    Node* parse(const std::string& string);
 };
 
 }

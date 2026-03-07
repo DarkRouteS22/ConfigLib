@@ -3,10 +3,12 @@
 
 #include <string>
 #include <vector>
-#include <memory>
 #include <unordered_map>
 
 namespace Config {
+class ArrayNode;
+class ValueNode;
+class ObjectNode;
 
 enum class NodeType {
     ValueNode,
@@ -17,32 +19,52 @@ enum class NodeType {
 class Node {
 public:
     virtual ~Node() = default;
-    virtual std::string serialize() = 0;
     virtual NodeType type() const = 0;
+    virtual std::string toString() = 0;
 };
 
 class ValueNode : public Node {
 private:
     std::string value;  
 public:
-    std::string getValue(); 
-    NodeType type() const override { return NodeType::ValueNode; };
+    ValueNode();
+    std::string& getValue();
+    void set(std::string&);
+
+    NodeType type() const override;
+    std::string toString() override;
 };
 
 class ObjectNode : public Node {
 private:
-    std::unordered_map<std::string, std::shared_ptr<Node>> fields;
+    std::unordered_map<std::string, Node*> fields;
 public:
-    std::unordered_map<std::string, std::shared_ptr<Node>> getValue(); 
-    NodeType type() const override { return NodeType::ObjectNode; };
+    ObjectNode();
+
+    std::unordered_map<std::string, Node*>& getValue();
+    void add(const std::string&, Node*);
+    void set(std::unordered_map<std::string, Node*>);
+    
+    size_t size() const;
+    std::string toString() override;
+    NodeType type() const override;
+
+    // TODO: list() -> name : type
 };
 
 class ArrayNode : public Node {
 private:
-    std::vector<std::shared_ptr<Node>> elements;
+    std::vector<Node*> elements;
 public:
-    std::vector<std::shared_ptr<Node>> getValue(); 
-    NodeType type() const override { return NodeType::ArrayNode; };
+    ArrayNode();
+
+    std::vector<Node*> getValue(); 
+    void add(Node*);
+    void set(std::vector<Node*>);
+
+    size_t size() const;
+    NodeType type() const override;
+    std::string toString() override;
 };
 
 }
