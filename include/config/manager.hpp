@@ -4,6 +4,7 @@
 #include "config/nodes.hpp"
 #include <memory>
 #include <vector>
+#include <type_traits>
 
 namespace Config {
 
@@ -15,7 +16,7 @@ public:
     
     template<typename T>
     T* create() {
-        static_assert(std::is_base_of_v<Config::Node, T>);
+        static_assert(std::is_base_of_v<Config::Node, T>, "T must inherit Node");
         auto node = std::make_unique<T>();
         T* ptr = node.get();
         storage.push_back(std::move(node));
