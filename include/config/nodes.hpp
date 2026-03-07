@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+// #include <config/manager.hpp>
 
 namespace Config {
 class ArrayNode;
@@ -36,12 +37,13 @@ public:
     void set(const std::string&, ValueType);
     NodeType type() const override;
     ValueType valueType() const;
+private:
+    friend class Manager;
+    ValueNode() = default;
 
 private:
     std::string value; 
     ValueType vtype;
-    ValueNode();
-    friend class Manager;
 };
 
 class ObjectNode : public Node {
@@ -55,9 +57,11 @@ public:
     NodeType type() const override;
 
 private:
-    std::unordered_map<std::string, Node*> fields;
-    ObjectNode();
     friend class Manager;
+    ObjectNode() = default;
+
+private:
+    std::unordered_map<std::string, Node*> fields;
 };
 
 class ArrayNode : public Node {
@@ -67,11 +71,12 @@ public:
     void set(const std::vector<Node*>);
     size_t size() const;
     NodeType type() const override;
+private:
+    friend class Manager;
+    ArrayNode() = default;
 
 private:
     std::vector<Node*> elements;
-    ArrayNode();
-    friend class Manager;
 };
 
 }
