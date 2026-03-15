@@ -1,18 +1,7 @@
 #include <config/nodes.hpp>
+#include <stdexcept>
 
 using namespace Config;
-
-std::vector<Node*>& ArrayNode::getValue() {
-    return elements;
-}
-
-void ArrayNode::add(Node* node) {
-    elements.push_back(node);
-}
-
-void ArrayNode::set(const std::vector<Node*> elements) {
-    this->elements = elements;
-}
 
 size_t ArrayNode::size() const {
     return elements.size();
@@ -20,4 +9,19 @@ size_t ArrayNode::size() const {
 
 NodeType ArrayNode::type() const {
     return NodeType::ArrayNode;
+}
+
+Node& ArrayNode::operator[](unsigned int index) {
+    if (index >= size())
+        throw std::out_of_range("ArrayNode: index out of range");
+    return *elements[index];
+}
+
+Node& ArrayNode::at(unsigned int index) {
+    return (*this)[index];
+}
+
+Node& ArrayNode::add(Node& node) {
+    elements.push_back(&node);
+    return node;
 }

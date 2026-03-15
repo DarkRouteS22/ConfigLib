@@ -1,6 +1,7 @@
 #ifndef CONFIG_NODES_HPP
 #define CONFIG_NODES_HPP
 
+#include <config/manager.hpp>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -9,6 +10,9 @@ namespace Config {
 class ArrayNode;
 class ValueNode;
 class ObjectNode;
+class Manager;
+
+
 
 enum class NodeType {
     ValueNode,
@@ -20,6 +24,22 @@ class Node {
 public:
     virtual ~Node() = default;
     virtual NodeType type() const = 0;
+
+    Node& operator[](const std::string&);
+    Node& operator[](int);
+
+    ObjectNode& asObject();
+    const ObjectNode& asObject() const;
+
+    ValueNode& asValue();
+    const ValueNode& asValue() const;
+
+    ArrayNode& asArray();
+    const ArrayNode& asArray() const;
+
+    ObjectNode* tryAsObject();
+    ValueNode* tryAsValue();
+    ArrayNode* tryAsArray();
 };
 
 class ValueNode : public Node {
@@ -78,11 +98,17 @@ private:
 
 class ObjectNode : public Node {
 public:
-    std::unordered_map<std::string, Node*>& getValue();
-    void add(const std::string&, Node*);
-    void set(const std::unordered_map<std::string, Node*>&);
-    bool contains(const std::string&) const;
-    void remove(const std::string&);
+    // get ptr to Node
+    // get child value by key with throw
+    Node& operator[](const std::string&);  
+
+    // get child value by key
+    Node& at(const std::string&);      
+
+    // get nested value by path with throw
+    Node& getPath(const std::string&, Manager&);
+
+
     size_t size() const;
     NodeType type() const override;
 
@@ -90,22 +116,28 @@ private:
     friend class Manager;
     ObjectNode() = default;
 
-private:
     std::unordered_map<std::string, Node*> fields;
 };
 
 class ArrayNode : public Node {
 public:
-    std::vector<Node*>& getValue(); 
-    void add(Node*);
-    void set(const std::vector<Node*>);
+    Node& operator[](unsigned int);
+    Node& at(unsigned int);
+    
+    Node& add(Node&);
+    template<typename T>
+    T& add(Manager& manager) {
+        T* ptr = manager.create<T>();
+        elements.push_back(ptr);
+        return *ptr;
+    }
+
     size_t size() const;
     NodeType type() const override;
 private:
     friend class Manager;
     ArrayNode() = default;
 
-private:
     std::vector<Node*> elements;
 };
 
