@@ -9,14 +9,8 @@ namespace Config {
 
 class Parser {
 public:
-    enum Type {
-        JSON,
-    };
-    Parser(Type, Manager&);
-    Node* toNode(const std::string&);
-    std::string toString(const Node*);
-private:
-    Type type;
+    static Node* fromJson(Manager&, const std::string&);
+    static std::string toJson(const Node*);
 };
 
 }
