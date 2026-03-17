@@ -1,63 +1,53 @@
-#include <config/nodes.hpp>
-#include <optional>
+#include <config/Node.h>
 #include <stdexcept>
 
 using namespace Config;
 
-Node& Node::operator[](const std::string& key) {
-    return asObject()[key];
+Node::Node(NodeType type) : nodeType(type) {};
+
+size_t Node::size() const {
+    if (none()) return 0;
+    if (isValue()) return isNull() ? 0 : 1;
+    return isObject() ? obj.size() : arr.size();
 }
 
-ObjectNode& Node::asObject() {
-    if (type() == NodeType::ObjectNode) 
-        return static_cast<ObjectNode&>(*this);
-    throw std::runtime_error("Node: not an objec");
+NodeType Node::type() const {
+    return nodeType;
 }
 
-const ObjectNode& Node::asObject() const{
-    if (type() == NodeType::ObjectNode) 
-        return static_cast<const ObjectNode&>(*this);
-    throw std::runtime_error("Node: not an object");
+bool Node::isValue() const {
+    return type() == NodeType::Value;
 }
 
-ValueNode& Node::asValue() {
-    if (type() == NodeType::ValueNode) 
-        return static_cast<ValueNode&>(*this);
-    throw std::runtime_error("Node: not a value");
+bool Node::isObject() const {
+    return type() == NodeType::Object;
 }
 
-const ValueNode& Node::asValue() const {
-    if (type() == NodeType::ValueNode) 
-        return static_cast<const ValueNode&>(*this);
-    throw std::runtime_error("Node: not a value");
+bool Node::isArray() const {
+    return type() == NodeType::Array;
 }
 
-ArrayNode& Node::asArray() {
-    if (type() == NodeType::ArrayNode) 
-        return static_cast<ArrayNode&>(*this);
-    throw std::runtime_error("Node: not an array");
+bool Node::none() const {
+    return type() == NodeType::None;
 }
 
-const ArrayNode& Node::asArray() const {
-    if (type() == NodeType::ArrayNode) 
-        return static_cast<const ArrayNode&>(*this);
-    throw std::runtime_error("Node: not an array");
+Node& Node::asValue() {
+    if (none()) nodeType = NodeType::Value;
+    if (!isValue()) 
+        throw std::runtime_error("Node: type is not equal None or Value");
+    return *this;
 }
 
-ObjectNode* Node::tryAsObject() {
-    if (type() == NodeType::ObjectNode) 
-        return static_cast<ObjectNode*>(this);
-    return nullptr;
+Node& Node::asObject() {
+    if (none()) nodeType = NodeType::Object;
+    if (!isObject())
+        throw std::runtime_error("Node: type is not equal None or Object");
+    return *this;
 }
 
-ValueNode* Node::tryAsValue() {
-    if (type() == NodeType::ObjectNode) 
-        return static_cast<ValueNode*>(this);
-    return nullptr;
-}
-
-ArrayNode* Node::tryAsArray() {
-    if (type() == NodeType::ObjectNode) 
-        return static_cast<ArrayNode*>(this);
-    return nullptr;
+Node& Node::asArray() {
+    if (none()) nodeType = NodeType::Array;
+    if (!isArray())
+        throw std::runtime_error("Node: type is not None or Array");
+    return *this;
 }

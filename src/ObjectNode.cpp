@@ -1,44 +1,40 @@
-#include <config/nodes.hpp>
-#include <config/manager.hpp>
+#include <config/Node.h>
 #include <stdexcept>
 
 using namespace Config;
 
-size_t ObjectNode::size() const {
-    return fields.size();
+Node& Node::operator[](const std::string& key) {
+    asObject();
+    return obj[key];
 }
 
-NodeType ObjectNode::type() const {
-    return NodeType::ObjectNode;
+Node& Node::at(const std::string& key) {
+    asObject();
+    auto it = obj.find(key);
+    if (it == obj.end()) 
+        throw std::out_of_range("Node: out of rande in Object");
+    return it->second;
 }
 
-Node& ObjectNode::operator[](const std::string& key) {
-    return *(fields[key]);
+Node& Node::path(const std::string& path) {
+    asObject();
+    size_t pos = path.find('.');
+    if (pos == std::string::npos) return obj[path];
+
+    std::string first = path.substr(0, pos);
+    std::string rest = path.substr(pos + 1);
+
+    return obj[first].path(rest);
 }
 
-Node& ObjectNode::at(const std::string& key) {
-    auto it = fields.find(key);
-    if (it == fields.end()) { 
-        throw std::out_of_range(
-        "ObjectNode: no found by key: " + key
-        );
-    }
-    return *it->second;
-}
+Node& Node::atPath(const std::string& path) {
+    asObject();
 
-Node& ObjectNode::getPath(const std::string& path, Manager& manager) {
-    // get position of first point
-    size_t pos = path.find('.'); 
-    
-    // if path equal key
-    if (pos == std::string::npos) return *fields[path]; 
-    
-    std::string first = path.substr(0, pos); // first key
-    std::string rest = path.substr(pos + 1);   // rest path
+    size_t pos = path.find(".");
+    if (pos == std::string::npos) return obj.at(path);
 
-    Node*& child = fields[first]; // get node
-    // if Node equal nullptr
-    if (!child) child = manager.create<ObjectNode>(); 
+    std::string first = path.substr(0, pos);
+    std::string rest = path.substr(pos + 1);
 
-    return child->asObject().getPath(rest, manager);
+    return obj.at(first).atPath(rest);
 }

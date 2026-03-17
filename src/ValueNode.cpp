@@ -1,97 +1,115 @@
-#include <config/nodes.hpp>
-#include <cstdint>
-#include <stdexcept>
+#include <config/Node.h>
 
 using namespace Config;
 
-NodeType ValueNode::type() const {
-    return NodeType::ValueNode;
-}
-
-/*---| set Value function block |---*/
-void ValueNode::setInt(int64_t i) {
-    data.i = i;
-    valType = ValueType::Int;
-}
-
-void ValueNode::setBool(bool b) {
-    data.b = b;
-    valType = ValueType::Bool;
-}
-
-void ValueNode::setFloat(double f) {
-    data.f = f;
-    valType = ValueType::Float;
-}
-
-void ValueNode::setString(std::string str) {
-    strValue = std::move(str);
-    valType = ValueType::String;
-}
-
-void ValueNode::setNull() {
-    valType = ValueType::Null;
-}
-
-/*---| get value type function block |---*/
-bool ValueNode::isBool() const {
-    return ValueType::Bool == valType;
-}
-
-bool ValueNode::isFloat() const {
-    return valType == ValueType::Float;
-}
-
-bool ValueNode::isInt() const {
-    return valType == ValueType::Int;
-}
-
-bool ValueNode::isNull() const {
-    return valType == ValueType::Null;
-}
-
-bool ValueNode::isString() const {
-    return valType == ValueType::String;
-}
-
-ValueNode::ValueType ValueNode::valueType() const {
+ValueType Node::valueType() const {
     return valType;
 }
 
-/*---| get value functions block with exceprion |---*/
-int64_t ValueNode::asInt() const {
-    if (isInt()) return data.i;
-    throw std::runtime_error("ValueNode: not an int");
+bool Node::isNull() const {
+    return valueType() == ValueType::Null; 
 }
 
-double ValueNode::asFloat() const {
-    if (isFloat()) return data.f;
-    throw std::runtime_error("ValueNode: not a float");
+bool Node::isString() const {
+    return valueType() == ValueType::String; 
 }
 
-bool ValueNode::asBool() const {
-    if (isBool()) return data.b;
-    throw std::runtime_error("ValueNode: not a bool");
+bool Node::isInt() const {
+    return valueType() == ValueType::Int; 
 }
 
-const std::string& ValueNode::asString() const {
-    if (isString()) return strValue;
-    throw std::runtime_error("ValueNode: not a string");
+bool Node::isFloat() const {
+    return valueType() == ValueType::Float; 
 }
 
-/*---| get value or default functions |--w-*/
-int64_t ValueNode::tryAsInt(int64_t i) const {
-    return isInt() ? data.i : i;
+bool Node::isBool() const {
+    return valueType() == ValueType::Bool; 
 }
 
-double ValueNode::tryAsFloat(double f) const {
-    return isFloat() ? data.f : f;
+std::string Node::asString() {
+    asValue();
+    if (!isString()) valType = ValueType::String;
+    return s;
 }
 
-bool ValueNode::tryAsBool(bool b) const {
-    return isBool() ? data.b : b;
+int64_t Node::asInt() {
+    asValue();
+    if (!isInt()) valType = ValueType::Int;
+    return data.i;
 }
 
-const std::string& ValueNode::tryAsString(const std::string& str) const {
-    return isString() ? strValue : str;
+double Node::asFloat() {
+    asValue();
+    if (!isFloat()) valType = ValueType::Float;
+    return data.f;
+}
+
+bool Node::asBool() {
+    asValue();
+    if(!isBool()) valType = ValueType::Bool;
+    return data.b;
+}
+
+Node& Node::operator=(int i) {
+    asInt();
+    data.i = i;
+    return *this;
+}
+
+Node& Node::operator=(bool b) {
+    asBool();
+    data.b = b;
+    return *this;
+}
+
+Node& Node::operator=(double f) {
+    asFloat();
+    data.f = f;
+    return *this;
+}
+
+Node& Node::operator=(const std::string& str) {
+    asString();
+    s = str;
+    return *this;
+}
+
+Node& Node::operator=(const char* str) {
+    return *this = std::string(str);
+}
+
+Node& Node::set(int i) {
+    return *this = i;
+}
+
+Node& Node::set(bool b) {
+    return *this = b;
+}
+
+Node& Node::set(double f) {
+    return *this = f;
+}
+
+Node& Node::set(const std::string& str) {
+    return *this = str;
+}
+
+Node& Node::set(const char* str) {
+    return *this = str;
+}
+
+int64_t Node::tryAsInt(int64_t def) const {
+    return (isValue() && isInt()) ? data.i : def;
+}
+
+double Node::tryAsFloat(double def) const {
+    return (isValue() && isFloat()) ? data.f : def;
+}
+
+bool Node::tryAsBool(bool def) const {
+    return (isValue() && isBool()) ? data.b : def;
+}
+
+const std::string& Node::tryAsString(const std::string& def) const {
+    return (isValue() && isString()) ? s : def;
 }

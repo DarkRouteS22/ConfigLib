@@ -1,27 +1,24 @@
-#include <config/nodes.hpp>
+#include <config/Node.h>
 #include <stdexcept>
 
 using namespace Config;
 
-size_t ArrayNode::size() const {
-    return elements.size();
+Node& Node::operator[](size_t i) {
+    asArray();
+    if (i >= size()) 
+        arr.resize(i + 1);
+    return arr.at(i);
 }
 
-NodeType ArrayNode::type() const {
-    return NodeType::ArrayNode;
+Node& Node::at(size_t i) {
+    asArray();
+    if (i >= size()) 
+        throw std::out_of_range("Node: out uf range ib array");
+    return arr.at(i);
 }
 
-Node& ArrayNode::operator[](unsigned int index) {
-    if (index >= size())
-        throw std::out_of_range("ArrayNode: index out of range");
-    return *elements[index];
-}
-
-Node& ArrayNode::at(unsigned int index) {
-    return (*this)[index];
-}
-
-Node& ArrayNode::add(Node& node) {
-    elements.push_back(&node);
-    return node;
+Node& Node::add() {
+    asArray();
+    arr.emplace_back();
+    return arr.back();
 }

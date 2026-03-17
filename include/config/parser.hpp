@@ -1,16 +1,14 @@
 #ifndef CONFIG_PARSER_HPP
 #define CONFIG_PARSER_HPP
 
-#include <config/nodes.hpp>
-#include <config/manager.hpp>
+#include <config/Nodes.h>
 
 namespace Config {
 
-
 class Parser {
 public:
-    static Node* fromJson(Manager&, const std::string&);
-    static std::string toJson(const Node*);
+    static Node& fromJson(const std::string&);
+    static std::string fromJson(const Node&);
 };
 
 }
