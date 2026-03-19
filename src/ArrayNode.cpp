@@ -22,3 +22,13 @@ Node& Node::add() {
     arr.emplace_back();
     return arr.back();
 }
+
+__gnu_cxx::__normal_iterator<Config::Node *, std::vector<Config::Node, std::allocator<Config::Node>>> Node::begin() {
+    if (!isArray()) throw std::runtime_error("Node is not Array");
+    return arr.begin();
+}
+
+__gnu_cxx::__normal_iterator<Config::Node *, std::vector<Config::Node, std::allocator<Config::Node>>> Node::end() {
+    if (!isArray()) throw std::runtime_error("Node is not Array");
+    return arr.end();
+}

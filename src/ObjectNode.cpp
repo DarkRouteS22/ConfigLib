@@ -1,3 +1,5 @@
+
+#include <algorithm>
 #include <config/Node.h>
 #include <stdexcept>
 
@@ -17,14 +19,25 @@ Node& Node::at(const std::string& key) {
 }
 
 Node& Node::path(const std::string& path) {
-    asObject();
-    size_t pos = path.find('.');
-    if (pos == std::string::npos) return obj[path];
+    Node* current = this;
+    size_t start = 0;
 
-    std::string first = path.substr(0, pos);
-    std::string rest = path.substr(pos + 1);
+    while (true) {
+        size_t dot = path.find('.', start);
+        std::string part = path.substr(start, dot - start);
 
-    return obj[first].path(rest);
+        if (!part.empty() && std::all_of(part.begin(), part.end(), ::isdigit)) {
+            size_t index = std::stoull(part);
+            current = &((*current)[index]);
+        } else {
+            current = &((*current)[part]);
+        }
+
+        if (dot == std::string::npos) break;
+        start = dot + 1;
+    }
+
+    return *current;
 }
 
 Node& Node::atPath(const std::string& path) {

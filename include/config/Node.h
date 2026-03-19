@@ -46,6 +46,9 @@ public:
     Node& at(size_t);
     Node& add();
     
+    __gnu_cxx::__normal_iterator<Config::Node *, std::vector<Config::Node, std::allocator<Config::Node>>> begin();
+    __gnu_cxx::__normal_iterator<Config::Node *, std::vector<Config::Node, std::allocator<Config::Node>>> end();
+
     // object
     Node& operator[](const std::string&);
     Node& at(const std::string&);
