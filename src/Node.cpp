@@ -1,52 +1,55 @@
-#include <config/Node.h>
+#include "config/Node.h"
+
 #include <stdexcept>
+#include <vector>
+#include <unordered_map>
 
 using namespace Config;
 
-Node::Node(NodeType type) : nodeType(type) {};
+Node::Node(NodeType type) : node_type_(type) {};
 
 size_t Node::size() const {
-    if (none()) return 0;
+    if (isNone()) return 0;
     if (isValue()) return isNull() ? 0 : 1;
-    return isObject() ? obj.size() : arr.size();
+    return isObject() ? object_value_.size() : array_value_.size();
 }
 
-NodeType Node::type() const {
-    return nodeType;
+NodeType Node::nodeType() const {
+    return node_type_;
 }
 
 bool Node::isValue() const {
-    return type() == NodeType::Value;
+    return nodeType() == NodeType::Value;
 }
 
 bool Node::isObject() const {
-    return type() == NodeType::Object;
+    return nodeType() == NodeType::Object;
 }
 
 bool Node::isArray() const {
-    return type() == NodeType::Array;
+    return nodeType() == NodeType::Array;
 }
 
-bool Node::none() const {
-    return type() == NodeType::None;
+bool Node::isNone() const {
+    return nodeType() == NodeType::None;
 }
 
 Node& Node::asValue() {
-    if (none()) nodeType = NodeType::Value;
+    if (isNone()) node_type_ = NodeType::Value;
     if (!isValue()) 
         throw std::runtime_error("Node: type is not equal None or Value");
     return *this;
 }
 
 Node& Node::asObject() {
-    if (none()) nodeType = NodeType::Object;
+    if (isNone()) node_type_ = NodeType::Object;
     if (!isObject())
         throw std::runtime_error("Node: type is not equal None or Object");
     return *this;
 }
 
 Node& Node::asArray() {
-    if (none()) nodeType = NodeType::Array;
+    if (isNone()) node_type_ = NodeType::Array;
     if (!isArray())
         throw std::runtime_error("Node: type is not None or Array");
     return *this;

@@ -1,19 +1,21 @@
+#include "config/Node.h"
 
 #include <algorithm>
-#include <config/Node.h>
 #include <stdexcept>
+#include <string>
+#include <unordered_map>
 
 using namespace Config;
 
 Node& Node::operator[](const std::string& key) {
     asObject();
-    return obj[key];
+    return object_value_[key];
 }
 
 Node& Node::at(const std::string& key) {
     asObject();
-    auto it = obj.find(key);
-    if (it == obj.end()) 
+    auto it = object_value_.find(key);
+    if (it == object_value_.end()) 
         throw std::out_of_range("Node: out of rande in Object");
     return it->second;
 }
@@ -44,10 +46,10 @@ Node& Node::atPath(const std::string& path) {
     asObject();
 
     size_t pos = path.find(".");
-    if (pos == std::string::npos) return obj.at(path);
+    if (pos == std::string::npos) return object_value_.at(path);
 
     std::string first = path.substr(0, pos);
     std::string rest = path.substr(pos + 1);
 
-    return obj.at(first).atPath(rest);
+    return object_value_.at(first).atPath(rest);
 }

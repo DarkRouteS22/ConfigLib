@@ -1,34 +1,36 @@
-#include <config/Node.h>
+#include "config/Node.h"
+
 #include <stdexcept>
+#include <vector>
 
 using namespace Config;
 
 Node& Node::operator[](size_t i) {
     asArray();
     if (i >= size()) 
-        arr.resize(i + 1);
-    return arr.at(i);
+        array_value_.resize(i + 1);
+    return array_value_.at(i);
 }
 
 Node& Node::at(size_t i) {
     asArray();
     if (i >= size()) 
         throw std::out_of_range("Node: out uf range ib array");
-    return arr.at(i);
+    return array_value_.at(i);
 }
 
 Node& Node::add() {
     asArray();
-    arr.emplace_back();
-    return arr.back();
+    array_value_.emplace_back();
+    return array_value_.back();
 }
 
-__gnu_cxx::__normal_iterator<Config::Node *, std::vector<Config::Node, std::allocator<Config::Node>>> Node::begin() {
+std::vector<Node>::iterator Node::begin() {
     if (!isArray()) throw std::runtime_error("Node is not Array");
-    return arr.begin();
+    return array_value_.begin();
 }
 
-__gnu_cxx::__normal_iterator<Config::Node *, std::vector<Config::Node, std::allocator<Config::Node>>> Node::end() {
+std::vector<Node>::iterator Node::end() {
     if (!isArray()) throw std::runtime_error("Node is not Array");
-    return arr.end();
+    return array_value_.end();
 }
