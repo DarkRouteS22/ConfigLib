@@ -25,9 +25,25 @@ enum class ValueType {
 
 class Node {
 public:
+static std::string ToString(NodeType t)
+{
+    switch (t)
+    {
+        case NodeType::None:   return "none";
+        case NodeType::Value:   return "value";
+        case NodeType::Object: return "obj";
+        default: return "arr";
+    }
+}
+
     // general
     Node() = default;
     Node(NodeType type);
+    Node(const Node& node);
+    Node(Node&& node);
+    Node& operator=(const Node&);
+    Node& operator=(Node&&);
+
 
     NodeType nodeType() const;
     size_t size() const;
@@ -58,21 +74,22 @@ public:
     // value
     ValueType valueType() const;
 
-    void operator=(int64_t value);
-    void operator=(int value);
+    void operator=(long value);
     void operator=(bool value);
     void operator=(double value);
     void operator=(const std::string& value);
     void operator=(const char* value);
+    void operator=(std::nullptr_t);
 
-    Node& set(int64_t value);
-    Node& set(bool value);
-    Node& set(double value);
-    Node& set(const std::string& value);
-    Node& set(const char* value);
+    Node& setInt(long value);
+    Node& setBool(bool value);
+    Node& setFloat(double value);
+    Node& setString(const std::string& value);
+    Node& setString(const char* value);
+    Node& setNull();
 
     std::string asString() const;
-    int64_t asInt() const;
+    long asInt() const;
     double asFloat() const;
     bool asBool() const;
 
@@ -87,7 +104,7 @@ public:
     bool isFloat() const;
     bool isBool() const;
     
-    int64_t tryAsInt(int64_t def) const;
+    int64_t tryAsInt(long def) const;
     double tryAsFloat(double def) const;
     bool tryAsBool(bool def) const;
     const std::string& tryAsString(const std::string& def) const;
@@ -99,7 +116,7 @@ private:
     union {
         bool bool_value_;
         double float_value_;
-        int64_t int_value_;
+        long int_value_;
     } value_data_;
     std::string string_value_;
 

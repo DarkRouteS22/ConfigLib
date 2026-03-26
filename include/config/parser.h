@@ -9,7 +9,7 @@ namespace Config {
 enum class JsonToken;
 class Node;
 
-class JsonParser {
+class Json {
 public:
     static Node fromJson(const std::string&);
     static Node fromJson(const std::vector<std::string>&);

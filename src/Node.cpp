@@ -4,6 +4,8 @@
 #include <vector>
 #include <unordered_map>
 
+#include <iostream>
+
 using namespace Config;
 
 Node::Node(NodeType type) : node_type_(type) {};
@@ -43,6 +45,9 @@ Node& Node::asValue() {
 
 Node& Node::asObject() {
     if (isNone()) node_type_ = NodeType::Object;
+    // ! DEBUG
+    std::cout << ToString(nodeType()) << "\n";
+
     if (!isObject())
         throw std::runtime_error("Node: type is not equal None or Object");
     return *this;
