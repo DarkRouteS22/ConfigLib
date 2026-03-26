@@ -43,7 +43,6 @@ Node node(Config::NodeType::Value)
 | `isValue()`  | bool     | Является ли Value  |
 | `isObject()` | bool     | Является ли Object |
 | `isArray()`  | bool     | Является ли Array  |
-| --------------| ----------| --------------------|
 
 
 Так же есть методы, приводящие к определённому типу Node:
@@ -53,7 +52,7 @@ Node node(Config::NodeType::Value)
 | `asValue()`  | Приводит NodeType к Value  |
 | `asObject()` | Приводит NodeType к Object |
 | `asArray()`  | Приводит NodeType к Array  |
-| --------------| ----------------------------|
+
 
 Но они будут использоваться редко из за lazy приведения.
 
@@ -65,7 +64,7 @@ Node node(Config::NodeType::Value)
 | Value  | 1                  |
 | Object | unordered_map size |
 | Array  | vector size        |
-| --------| --------------------|
+
 
 ---
 
