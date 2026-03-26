@@ -1,5 +1,10 @@
 # ConfigLib
-![Version](https://img.shields.io/badge/version-work_in_progress-blue)![License](https://img.shields.io/badge/license-MIT-green)![C++](https://img.shields.io/badge/C%2B%2B-17-blue)
+![Version](https://img.shields.io/badge/version-work_in_progress-blue)
+
+![License](https://img.shields.io/badge/license-MIT-green)
+
+![C++](https://img.shields.io/badge/C%2B%2B-17-blue)
+
 ![CMake](https://img.shields.io/badge/CMake-3.16+-064C8B) 
 
 ### Предназначение
@@ -41,6 +46,8 @@ Node node(Config::NodeType::Value)
 | `isValue()`  | bool     | Является ли Value  |
 | `isObject()` | bool     | Является ли Object |
 | `isArray()`  | bool     | Является ли Array  |
+| --------------| ----------| --------------------|
+
 
 Так же есть методы, приводящие к определённому типу Node:
 
@@ -49,6 +56,8 @@ Node node(Config::NodeType::Value)
 | `asValue()`  | Приводит NodeType к Value  |
 | `asObject()` | Приводит NodeType к Object |
 | `asArray()`  | Приводит NodeType к Array  |
+| --------------| ----------------------------|
+
 Но они будут использоваться редко из за lazy приведения.
 
 Так же есть метод `size()` - возвращает размер хранилища Node
@@ -59,6 +68,8 @@ Node node(Config::NodeType::Value)
 | Value  | 1                  |
 | Object | unordered_map size |
 | Array  | vector size        |
+| --------| --------------------|
 
 ---
+
 #### Value
