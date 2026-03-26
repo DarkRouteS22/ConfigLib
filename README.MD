@@ -1,10 +1,7 @@
 # ConfigLib
 ![Version](https://img.shields.io/badge/version-work_in_progress-blue)
-
 ![License](https://img.shields.io/badge/license-MIT-green)
-
 ![C++](https://img.shields.io/badge/C%2B%2B-17-blue)
-
 ![CMake](https://img.shields.io/badge/CMake-3.16+-064C8B) 
 
 ### Предназначение
