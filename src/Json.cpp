@@ -1,51 +1,63 @@
-#include "config/ParserUtils.h"
 #include "config/parser.h"
 
-#include "config/Node.h"
 #include <string>
 #include <vector>
+
+#include "config/Util.h"
+#include "config/JsonUtil.h"
+#include "config/Node.h"
+#include "config/Context.h"
+
 
 using namespace Config;
 
 Node Json::fromJson(const std::string& json) {
     std::vector<Token> tokens = JsonUtil::jsonLexer(json);
-
-    Node root;      // корень для возврата
-
+    
+    Node root; // корень для возврата
+    
     std::vector<Context> stack;
-    Context waiting;
+    Context context;
 
-    waiting.wait = Wait::Value;
-    waiting.parent = &root;
-    waiting.key = "";
+    context.wait = Wait::Value;
+    context.parent() = root;
 
     for (Token token : tokens) {
-        switch (waiting.wait) {
+        switch (context.wait) {
             case Wait::Value: {
-                if (token.type == JsonUtil::JsonToken::LBrace) {
-                    root.asObject();
-                    waiting.wait = Wait::Object;
+                if (token.type == JsonToken::LBrace) {
+                    // приводим к объекту
+                    context.parent().asObject(); 
+                    // ждём элементы объекта
+                    context.wait = Wait::Object; 
+
                     continue;
                 }
-                if (token.type == JsonUtil::JsonToken::LBracket ) {
-                    root.asArray();
-                    waiting.wait = Wait::Array;
+                if (token.type == JsonToken::LBracket ) {
+                    // приводим к массиву
+                    context.parent().asArray(); 
+                    // ждём элементы массива
+                    context.wait = Wait::Array; 
+
                     continue;
                 }
                 if (Util::isValue(token.type)) {
-                    if (tokens.size() != 1) Util::parseError("Parser: unexpected tokens", token);
-                    // return root.asValue().setInt(200);
+                    // todo: приведение к значению. парсинг значения и передача в Node
                 }
                 Util::parseError("Parser: unexpected token, expected Value, Left Brace or Left Bracket", token);
             }
             case Wait::Object: {
-                if (token.type == JsonUtil::JsonToken::String) {
-                    waiting.key = token.value;
-                    waiting.wait = Wait::AfterKey;
+                if (token.type == JsonToken::String) {
+                    
+                    context.parent() = context.parent()[token.value];
+                    context.wait = Wait::AfterKey;
+                    
                     continue;
                 }
-                if (token.type == JsonUtil::JsonToken::RBrace) {
-                    waiting.wait = Wait::None;
+                if (token.type == JsonToken::RBrace) {
+                    
+                    context.wait = Wait::None;
+                    
                     continue;
                 }
                 Util::parseError("Parser: unexpected token, expected Key or Right Brace", token);
@@ -53,30 +65,33 @@ Node Json::fromJson(const std::string& json) {
             }  
             case Wait::Array: {
                 if (Util::isValue(token.type)) {}
-                if (token.type == JsonUtil::JsonToken::RBracket) {}
+                if (token.type == JsonToken::RBracket) {}
                 Util::parseError("Parser: unexpected token, expected Value or Right Bracket", token);
                 break;
             }
             case Wait::AfterKey: {
-                if (token.type == JsonUtil::JsonToken::Colon) {}
+                if (token.type == JsonToken::Colon) {}
                 Util::parseError("Parser: unexpected token, expected Colon", token);
                 break;
             }
             case Wait::AfterOValue: {
-                if (token.type == JsonUtil::JsonToken::Comma) {}
-                if (token.type == JsonUtil::JsonToken::RBrace) {}
+                if (token.type == JsonToken::Comma) {}
+                if (token.type == JsonToken::RBrace) {}
                 Util::parseError("Parser: unexpected token, expected Comma or Right Brace", token);
                 break;
             }
             case Wait::AfterAValue: {
-                if (token.type == JsonUtil::JsonToken::Comma) {}
-                if (token.type == JsonUtil::JsonToken::RBracket) {}
+                if (token.type == JsonToken::Comma) {
+                    context.wait = Wait::Value;   
+                }
+                if (token.type == JsonToken::RBracket) {}
                 Util::parseError("Parser: unexpected token, expected Comma or Right Bracket", token);
                 break;
             }
             default: {
                 if (stack.size() == 1) return root;
-                waiting = stack.at(stack.size() - 1);
+                context = stack.back();
+                stack.pop_back();
             }
         }
     }

@@ -1,19 +1,30 @@
 #include "config/Node.h"
 
 #include <stdexcept>
+#include <utility>
 #include <vector>
 #include <unordered_map>
 
-#include <iostream>
-
 using namespace Config;
+
+Node::Node() {}
 
 Node::Node(NodeType type) : node_type_(type) {};
 
+Node& Node::operator=(Node node) {
+    std::swap(node_type_, node.node_type_);
+    std::swap(value_data_, node.value_data_);
+    std::swap(array_data_, node.array_data_);
+    std::swap(object_data_, node.object_data_);
+
+    return *this;
+}
+
+
 size_t Node::size() const {
-    if (isNone()) return 0;
-    if (isValue()) return isNull() ? 0 : 1;
-    return isObject() ? object_value_.size() : array_value_.size();
+    if (isArray() || isObject()) 
+        return isArray() ? array_data_.size() : object_data_.size();
+    else return 0;
 }
 
 NodeType Node::nodeType() const {
@@ -21,41 +32,35 @@ NodeType Node::nodeType() const {
 }
 
 bool Node::isValue() const {
-    return nodeType() == NodeType::Value;
+    return node_type_ == NodeType::Value;
 }
 
 bool Node::isObject() const {
-    return nodeType() == NodeType::Object;
+    return node_type_ == NodeType::Object;
 }
 
 bool Node::isArray() const {
-    return nodeType() == NodeType::Array;
+    return node_type_ == NodeType::Array;
 }
 
 bool Node::isNone() const {
-    return nodeType() == NodeType::None;
+    return node_type_ == NodeType::None;
 }
 
 Node& Node::asValue() {
-    if (isNone()) node_type_ = NodeType::Value;
-    if (!isValue()) 
-        throw std::runtime_error("Node: type is not equal None or Value");
+    if (isValue() || isNone()) node_type_ = NodeType::Value;
+    else std::runtime_error("Node type not equal None or Value");
     return *this;
 }
 
 Node& Node::asObject() {
-    if (isNone()) node_type_ = NodeType::Object;
-    // ! DEBUG
-    std::cout << ToString(nodeType()) << "\n";
-
-    if (!isObject())
-        throw std::runtime_error("Node: type is not equal None or Object");
+    if (isObject() || isNone()) node_type_ = NodeType::Object;
+    else std::runtime_error("Node type not equal None or Object");
     return *this;
 }
 
 Node& Node::asArray() {
-    if (isNone()) node_type_ = NodeType::Array;
-    if (!isArray())
-        throw std::runtime_error("Node: type is not None or Array");
+    if (isArray() || isNone()) node_type_ = NodeType::Array;
+    else std::runtime_error("Node type not equal None or Array");
     return *this;
 }

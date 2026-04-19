@@ -1,166 +1,95 @@
 #include "config/Node.h"
 
-#include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <stdexcept>
 #include <string>
-
-#include <iostream>
+#include <variant>
 
 using namespace Config;
 
-
-ValueType Node::valueType() const {
-    return value_type_;
-}
-
 bool Node::isNull() const {
-    return valueType() == ValueType::Null; 
+    return !value_data_;
 }
 
 bool Node::isString() const {
-    return valueType() == ValueType::String; 
+    if (isNull()) return false;
+    return std::holds_alternative<std::string>(*value_data_);    
 }
 
-bool Node::isInt() const {
-    return valueType() == ValueType::Int; 
+bool Node::isInt() const {    
+    if (isNull()) return false;
+    return std::holds_alternative<int64_t>(*value_data_);  
 }
 
 bool Node::isFloat() const {
-    return valueType() == ValueType::Float; 
+    if (isNull()) return false;
+    return std::holds_alternative<double>(*value_data_);  
 }
 
 bool Node::isBool() const {
-    return valueType() == ValueType::Bool; 
+    if (isNull()) return false;
+    return std::holds_alternative<bool>(*value_data_);  
 }
 
-std::string Node::asString() const {
-    if (isString()) return string_value_;
-    // ! DEBUG
-    std::cout << "on str" << "\n";
-    std::cout << ToString(nodeType()) << "\n";
-
-    throw std::runtime_error("Node: mismatch of types");
-}
-
-long Node::asInt() const {
-    if (isInt()) return value_data_.int_value_;
-    // ! DEBUG
-    std::cout << "on int" << "\n";
-    throw std::runtime_error("Node: mismatch of types");
-}
-
-double Node::asFloat() const {
-    if (isFloat()) return value_data_.float_value_;
-    // ! DEBUG
-    std::cout << "on float" << "\n";
-    throw std::runtime_error("Node: mismatch of types");
-}
-
-bool Node::asBool() const {
-    if (isBool()) return value_data_.bool_value_;
-    // ! DEBUG
-    std::cout << "on bool" << "\n";
-    throw std::runtime_error("Node: mismatch of types");
-}
-
-Node& Node::toString() {
-    asValue();
-    if (!isString()) value_type_ = ValueType::String;
+Node& Node::operator=(std::optional<value_data> value) {
+    value_data_ = value;
     return *this;
 }
 
-Node& Node::toInt() {
-    asValue();
-    if (!isInt()) value_type_ = ValueType::Int;
+Node& Node::operator=(std::string value) {
+    value_data_ = std::make_optional<value_data>(value);
     return *this;
 }
 
-Node& Node::toFloat() {
-    asValue();
-    if (!isFloat()) value_type_ = ValueType::Float;
+Node& Node::operator=(int64_t value) {
+    value_data_ = std::make_optional<value_data>(value);
     return *this;
 }
 
-Node& Node::toBool() {
-    asValue();
-    if(!isBool()) value_type_ = ValueType::Bool;
+Node& Node::operator=(double value) {
+    value_data_ = std::make_optional<value_data>(value);
     return *this;
 }
 
-void Node::operator=(long intValue) {
-    toInt();
-    value_data_.int_value_ = intValue;
-}
-
-void Node::operator=(bool boolValue) {
-    toBool();
-    value_data_.bool_value_ = boolValue;
-}
-
-void Node::operator=(double floatValue) {
-    toFloat();
-    value_data_.float_value_ = floatValue;
-}
-
-void Node::operator=(const std::string& str) {
-    toString();
-    string_value_ = str;
-}
-
-void Node::operator=(const char* str) {
-    *this = std::string(str);
-}
-
-
-Node& Node::setInt(long intValue) {
-    *this = intValue;
+Node& Node::operator=(bool value) {
+    value_data_ = std::make_optional<value_data>(value);
     return *this;
 }
 
-Node& Node::setBool(bool boolValue) {
-    *this = boolValue;
+Node& Node::operator=(std::nullopt_t) {
+    value_data_ = std::nullopt;
     return *this;
 }
 
-Node& Node::setFloat(double floatValue) {
-    *this = floatValue;
-    return *this;
+Node& Node::set(std::optional<value_data> value) {return (*this) = value;}
+Node& Node::set(std::string value) {return (*this) = value;}
+Node& Node::set(int64_t value) {return (*this) = value;}
+Node& Node::set(double value) {return (*this) = value;}
+Node& Node::set(bool value) {return (*this) = value;}
+Node& Node::set(std::nullopt_t value) {return (*this) = value;}
+
+std::optional<value_data> Node::getValue() const {
+    return value_data_;
 }
 
-Node& Node::setString(const std::string& str) {
-    *this = str;
-    return *this;
+std::string Node::getString() const {
+    if (!isValue()) throw std::runtime_error("Not Node a Value");
+    if (!isString()) throw std::runtime_error("Node Value in Not a String");
+    return std::get<std::string>(*value_data_);
 }
-
-Node& Node::setString(const char* str) {
-    *this = str;
-    return *this;
+int64_t Node::getInt() const {
+    if (!isValue()) throw std::runtime_error("Not Node a Value");
+    if (!isInt()) throw std::runtime_error("Node Value in Not an Int");
+    return std::get<int64_t>(*value_data_);
 }
-
-long Node::tryAsInt(long def) const {
-    return (isValue() && isInt()) ? value_data_.int_value_ : def;
+double Node::getFloat() const {
+    if (!isValue()) throw std::runtime_error("Not Node a Value");
+    if (!isFloat()) throw std::runtime_error("Node Value in Not a Float");
+    return std::get<double>(*value_data_);
 }
-
-double Node::tryAsFloat(double def) const {
-    return (isValue() && isFloat()) ? value_data_.float_value_ : def;
-}
-
-bool Node::tryAsBool(bool def) const {
-    return (isValue() && isBool()) ? value_data_.bool_value_ : def;
-}
-
-const std::string& Node::tryAsString(const std::string& def) const {
-    return (isValue() && isString()) ? string_value_ : def;
-}
-
-void Node::operator=(std::nullptr_t) {
-    node_type_ = NodeType::Value;
-    value_type_ = ValueType::Null;
-}
-
-Node& Node::setNull() {
-    node_type_ = NodeType::Value;
-    value_type_ = ValueType::Null;
-    return *this;
+bool Node::getBool() const {
+    if (!isValue()) throw std::runtime_error("Not Node a Value");
+    if (!isBool()) throw std::runtime_error("Node Value in Not a Bool");
+    return std::get<bool>(*value_data_);
 }

@@ -1,18 +1,8 @@
-#include "config/ParserUtils.h"
+#include "config/JsonUtil.h"
 
-#include <stdexcept>
-#include <string>
-#include <vector>
+#include "config/Util.h"
 
-using namespace Config; 
-
-void Util::parseError(const std::string &msg, Token token) {
-    throw std::runtime_error(
-        msg + "\n" +
-        "at Line: " + std::to_string(token.line) +
-        " Column: " + std::to_string(token.column)
-    );
-}
+using namespace Config;
 
 std::vector<Token> JsonUtil::jsonLexer(const std::string& json_string) {
     std::vector<Token> tokens;
@@ -148,11 +138,4 @@ std::vector<Token> JsonUtil::jsonLexer(const std::string& json_string) {
         }
     }
     return tokens;
-}
-
-bool Util::isValue(JsonUtil::JsonToken type) {
-    return type == JsonUtil::JsonToken::String ||
-           type == JsonUtil::JsonToken::Num    ||
-           type == JsonUtil::JsonToken::Bool   ||
-           type == JsonUtil::JsonToken::Null;
 }

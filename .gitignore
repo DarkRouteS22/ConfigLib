@@ -1,3 +1,4 @@
 assets/
 build/
 main.cpp
+.cache/
